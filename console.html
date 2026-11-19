@@ -1,0 +1,435 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CyberRange · консоль оператора</title>
+<style>
+:root{--ink:#05080f;--surf:#0d1526;--surf2:#111c33;--line:#1c2a49;--line2:#27395f;--cyan:#22d3ee;--cyanD:#0e7490;
+--blue:#60a5fa;--lime:#a3e635;--amber:#fbbf24;--rose:#fb7185;--roseD:#e11d48;--magenta:#e879f9;--orange:#f97316;--mint:#34d399;
+--txt:#e8eefb;--mut:#93a4c4;--dim:#5f7093;--glow:0 0 26px rgba(34,211,238,.16)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink);color:var(--txt);font-family:"Segoe UI",system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:11px;height:11px}::-webkit-scrollbar-track{background:#070c17}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#0e7490,#155e75);border:2px solid #070c17;border-radius:7px}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#22d3ee,#0e7490)}
+*{scrollbar-width:thin;scrollbar-color:#0e7490 #070c17}
+.mono{font-family:"Cascadia Code",Consolas,monospace}button,input,select{font-family:inherit}button{cursor:pointer}
+#bg{position:fixed;inset:0;z-index:-3;background:radial-gradient(1200px 620px at 8% -12%,rgba(14,116,144,.42),transparent 62%),radial-gradient(900px 700px at 98% 4%,rgba(232,121,249,.13),transparent 58%),radial-gradient(1000px 800px at 46% 118%,rgba(163,230,53,.09),transparent 62%),linear-gradient(180deg,#070c17,#05080f)}
+#bg::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(34,211,238,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(1000px 700px at 50% 12%,#000 25%,transparent 82%);mask-image:radial-gradient(1000px 700px at 50% 12%,#000 25%,transparent 82%)}
+#bg::after{content:"";position:absolute;inset:0;opacity:.45;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E")}
+.aur{position:fixed;z-index:-2;border-radius:50%;filter:blur(95px);opacity:.3;pointer-events:none;animation:drift 28s ease-in-out infinite alternate}
+.a1{width:540px;height:540px;left:-160px;top:-140px;background:#0e7490}.a2{width:430px;height:430px;right:-130px;top:26%;background:#7c3aed;animation-delay:-10s}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(80px,54px)}}
+#top{position:fixed;top:0;left:0;right:0;height:64px;z-index:70;display:flex;align-items:center;gap:12px;padding:0 16px;background:rgba(6,11,22,.86);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.15em;font-size:14px}
+.logo i{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan);animation:pl 2.2s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}.logo b{color:var(--cyan)}
+#tabs{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}#tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:1px solid transparent;color:var(--mut);padding:9px 14px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;transition:.2s}
+.tab:hover{color:var(--txt);background:rgba(34,211,238,.08)}
+.tab.on{color:var(--cyan);background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.4);box-shadow:var(--glow)}
+.spacer{flex:1}.pill{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:20px;border:1px solid var(--line);background:var(--surf);white-space:nowrap}
+.pill.live{border-color:#a3e63555;color:var(--lime)}.pill.live i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 9px var(--lime);animation:pl 1.4s infinite}
+.ib{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surf2);color:var(--txt);font-size:15px;display:grid;place-items:center;transition:.2s}
+.ib:hover{border-color:var(--cyan);box-shadow:var(--glow)}
+main{max-width:1340px;margin:0 auto;padding:86px 18px 70px}.view{animation:vin .5s cubic-bezier(.2,.85,.25,1)}
+@keyframes vin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.h1{font-size:25px;font-weight:800}.h1 small{display:block;font-size:12.5px;color:var(--mut);font-weight:500;margin-top:5px}
+.row{display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.card{background:linear-gradient(158deg,var(--surf),var(--surf2));border:1px solid var(--line);border-radius:14px;padding:17px;position:relative;transition:.25s}
+.card:hover{border-color:var(--line2)}.card.glow{border-color:rgba(34,211,238,.32);box-shadow:var(--glow)}
+.grid{display:grid;gap:13px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.btn{border:1px solid var(--line2);background:var(--surf2);color:var(--txt);padding:9px 15px;border-radius:10px;font-size:13px;font-weight:700;transition:.18s;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{transform:translateY(-1px);border-color:var(--cyan);box-shadow:var(--glow)}
+.btn.pri{background:linear-gradient(135deg,#0891b2,#0e7490);border-color:#22d3ee66;color:#eafcff}
+.btn.ok{background:linear-gradient(135deg,#3f6212,#4d7c0f);border-color:#a3e63566;color:#f3ffdc}
+.btn.warn{background:linear-gradient(135deg,#92400e,#b45309);border-color:#fbbf2466}
+.btn.bad{background:linear-gradient(135deg,#9f1239,#be123c);border-color:#fb718566}
+.btn.sm{padding:6px 11px;font-size:12px}.btn:disabled{opacity:.42;cursor:not-allowed;transform:none}
+.inp{background:#091020;border:1px solid var(--line);color:var(--txt);padding:10px 12px;border-radius:10px;font-size:13px;outline:none;transition:.2s;width:100%}
+.inp:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.13)}select.inp option{background:#0d1526}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.09em;padding:3px 9px;border-radius:20px;text-transform:uppercase;white-space:nowrap}
+.b1{background:#a3e63520;color:var(--lime);border:1px solid #a3e63555}.b2{background:#fbbf2420;color:var(--amber);border:1px solid #fbbf2455}
+.b3{background:#f9731620;color:var(--orange);border:1px solid #f9731655}.b4{background:#fb718520;color:var(--rose);border:1px solid #fb718555}
+.b5{background:#e879f920;color:var(--magenta);border:1px solid #e879f955}.bc{background:#22d3ee18;color:var(--cyan);border:1px solid #22d3ee44}
+.bg{background:#a3e63518;color:var(--lime);border:1px solid #a3e63544}.bb{background:#60a5fa18;color:var(--blue);border:1px solid #60a5fa44}
+.tag{font-size:10.5px;color:var(--mut);border:1px solid var(--line);padding:2px 8px;border-radius:7px;background:#091020}
+.mut{color:var(--mut)}.dim{color:var(--dim)}.sm{font-size:12px}.xs{font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.11em;padding:9px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid #13203a}tbody tr{cursor:pointer;transition:.15s}tbody tr:hover td{background:rgba(34,211,238,.05)}
+.chip{border:1px solid var(--line);background:var(--surf);color:var(--mut);padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;transition:.18s}
+.chip:hover{color:var(--txt);border-color:var(--cyan)}.chip.on{color:#04121a;background:var(--cyan);border-color:var(--cyan);font-weight:800}
+.bar{height:8px;background:#091020;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .6s}
+.empty{padding:34px;text-align:center;color:var(--dim);font-size:13px}
+.rank{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:13px;background:#091020;border:1px solid var(--line);color:var(--mut)}
+.rank.r1{background:linear-gradient(135deg,#fbbf24,#f97316);color:#2b1600}.rank.r2{background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#111827}
+.rank.r3{background:linear-gradient(135deg,#f97316,#9a3412);color:#2b1000}
+.av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;color:#04121a;background:linear-gradient(135deg,var(--cyan),var(--blue));flex:none}
+.fire{color:var(--amber);font-weight:800}
+#auth{min-height:100vh;display:grid;place-items:center;padding:22px}
+.ac{width:min(470px,95vw);padding:32px}.ac h1{font-size:30px;letter-spacing:.12em;font-weight:800}.ac h1 b{color:var(--cyan)}
+.seg{display:flex;gap:6px;background:#091020;border:1px solid var(--line);border-radius:11px;padding:4px;margin:16px 0}
+.seg button{flex:1;background:none;border:none;color:var(--mut);padding:9px;border-radius:8px;font-weight:700;font-size:13px}
+.seg button.on{background:rgba(34,211,238,.14);color:var(--cyan)}
+.err{border:1px solid #fb718555;background:#fb718512;color:var(--rose);padding:10px 12px;border-radius:10px;font-size:12.5px;margin-bottom:10px}
+.okbox{border:1px solid #a3e63555;background:#a3e63512;color:var(--lime);padding:10px 12px;border-radius:10px;font-size:12.5px;margin-bottom:10px}
+.layout{display:grid;grid-template-columns:1fr 340px;gap:15px;align-items:start}
+.panel{position:sticky;top:80px;background:linear-gradient(165deg,#0e1729,#0a1120);border:1px solid rgba(34,211,238,.3);border-radius:14px;padding:16px;box-shadow:var(--glow);max-height:calc(100vh - 100px);overflow-y:auto}
+.panel h4{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.ctl{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}
+.ctl>label{font-size:11.5px;color:var(--mut);font-weight:700;display:flex;justify-content:space-between}
+.ctl>label output{color:var(--cyan);font-weight:800}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;background:linear-gradient(90deg,var(--cyanD),#1c2a49);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);border:2px solid #04121a;box-shadow:0 0 10px var(--cyan);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cyan);border:2px solid #04121a;cursor:pointer}
+.tgl{display:flex;align-items:center;justify-content:space-between;gap:9px;font-size:12px;font-weight:600;margin-bottom:11px}
+.sw{width:40px;height:22px;border-radius:12px;background:#1c2a49;border:1px solid var(--line);position:relative;transition:.2s;flex:none;cursor:pointer}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--dim);transition:.2s}
+.sw.on{background:#0e7490;border-color:var(--cyan)}.sw.on::after{left:20px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.atk{cursor:pointer;overflow:hidden}.atk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lv)}
+.atk:hover{transform:translateY(-3px);box-shadow:0 12px 34px rgba(0,0,0,.45),var(--glow)}
+.atk .nm{font-weight:700;font-size:13.5px;margin:9px 0 5px;line-height:1.35}.atk .ds{font-size:11.5px;color:var(--mut);line-height:1.5;min-height:46px}
+.atk .ft{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.atk .ck{position:absolute;top:12px;right:12px;width:19px;height:19px;accent-color:var(--cyan)}
+.atk.picked{border-color:rgba(34,211,238,.55);box-shadow:var(--glow)}
+.qitem{display:flex;align-items:center;gap:9px;background:#091020;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:grab}
+.qitem.drag{opacity:.4}.qitem.over{border-color:var(--cyan);box-shadow:var(--glow)}
+.qitem .qn{flex:1;font-size:12px;font-weight:600}.qitem .del{background:none;border:none;color:var(--dim);font-size:14px}
+.qitem .del:hover{color:var(--rose)}
+.statline{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.st{flex:1;min-width:96px;background:#091020;border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+.st b{display:block;font-size:21px;font-weight:800}.st span{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+.logs{background:#05080f;border:1px solid var(--line);border-radius:10px;padding:9px;height:190px;overflow-y:auto;font-size:11px;line-height:1.7}
+.lr{color:var(--mut);display:flex;gap:8px}.lr.bad{color:var(--rose)}.lr.ok{color:var(--lime)}.lr.warn{color:var(--amber)}
+canvas.ch{width:100%;display:block}
+.evi{border:1px solid #a3e63544;background:#a3e63510;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5;color:var(--lime)}
+#scrim{position:fixed;inset:0;background:rgba(3,6,12,.72);backdrop-filter:blur(5px);z-index:80;opacity:0;pointer-events:none;transition:.3s}
+#scrim.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(500px,100vw);z-index:90;background:linear-gradient(180deg,#0d1628,#080e1c);border-left:1px solid rgba(34,211,238,.35);transform:translateX(106%);transition:.36s cubic-bezier(.2,.85,.25,1);overflow-y:auto;padding:22px}
+#drawer.on{transform:none}
+.ovh{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap}.ovh .t{font-weight:800;font-size:15.5px}
+.x{margin-left:auto;background:none;border:1px solid var(--line);color:var(--mut);width:32px;height:32px;border-radius:9px}
+.x:hover{color:var(--rose);border-color:var(--rose)}
+.flag{border:1px solid #fb718544;background:#fb718510;border-radius:10px;padding:10px 12px;font-size:12.5px;margin-bottom:7px;display:flex;gap:9px;line-height:1.5}
+.flag b{color:var(--rose)}
+.cmd{background:#05080f;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;line-height:1.8;word-break:break-all;color:var(--mint)}
+#toasts{position:fixed;left:16px;bottom:16px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{background:rgba(13,22,40,.96);border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:11px;padding:11px 15px;font-size:12.5px;display:flex;gap:12px;align-items:center;max-width:380px;animation:tin .3s}
+.toast.ok{border-left-color:var(--lime)}.toast.bad{border-left-color:var(--rose)}.toast.warn{border-left-color:var(--amber)}
+.toast button{background:none;border:none;color:var(--cyan);font-weight:800;font-size:12px}
+@keyframes tin{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
+@media(max-width:1040px){.layout{grid-template-columns:1fr}.panel{position:static;max-height:none}.g4,.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:660px){.g4,.g3,.g2{grid-template-columns:1fr}main{padding:80px 12px 54px}.h1{font-size:20px}}
+</style></head><body>
+<div id="bg"></div><div class="aur a1"></div><div class="aur a2"></div>
+<header id="top" style="display:none"><div class="logo"><i></i><span>CYBER<b>RANGE</b></span></div>
+<nav id="tabs"></nav><div class="spacer"></div><div id="status"></div>
+<button class="ib" id="mute">🔊</button><button class="ib" id="out">⏻</button></header>
+<main id="app"></main><div id="scrim"></div><aside id="drawer"></aside><div id="toasts"></div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const PAL=["#22d3ee","#a3e635","#fbbf24","#fb7185","#e879f9","#60a5fa","#f97316","#34d399"];
+const LVC=["","#a3e635","#fbbf24","#f97316","#fb7185","#e879f9"];
+const LVN=["","Новичок","Базовый","Продвинутый","Эксперт","Мастер"];
+const VEC={email:"📧 Email",sms:"📱 SMS",call:"📞 Звонок",usb:"🔌 USB",local:"🖥 Локально"};
+const OUT={report:["bg","сообщено"],avoid:["bg","отражено"],win:["bg","защита ✓"],ignore:["b2","проигнорировано"],click:["b3","клик"],submit:["b4","данные отправлены"],fail:["b4","провал"],lose:["b4","защита ✗"]};
+let S=null,UI={view:"rating",authMode:"login",aq:"",al:"",as:"lvl",rq:"",rs:"xp",sel:new Set(),monitor:null,drag:null,mute:false};
+const Snd={ctx:null,init(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume()},
+t(f,d,ty="sine",g=.06,w=0){if(UI.mute||!this.ctx)return;const s=this.ctx.currentTime+w,o=this.ctx.createOscillator(),v=this.ctx.createGain();o.type=ty;o.frequency.value=f;v.gain.setValueAtTime(0,s);v.gain.linearRampToValueAtTime(g,s+.014);v.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(v).connect(this.ctx.destination);o.start(s);o.stop(s+d+.05)},
+ping(){this.t(880,.16);this.t(1320,.2,"sine",.045,.08)},ok(){[523,659,784].forEach((f,i)=>this.t(f,.2,"triangle",.055,i*.08))},bad(){this.t(210,.3,"sawtooth",.05);this.t(150,.4,"sawtooth",.05,.13)}};
+document.addEventListener("pointerdown",()=>Snd.init(),{once:true});
+async function api(path,body,method){const r=await fetch(path,{method:method||(body?"POST":"GET"),headers:{"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+ const t=await r.text();let d={};try{d=t?JSON.parse(t):{}}catch(e){d={detail:t}}
+ if(!r.ok)throw new Error(d.detail||("HTTP "+r.status));return d;}
+function toast(m,type="",undo){const t=document.createElement("div");t.className="toast "+type;t.innerHTML=`<span>${esc(m)}</span>`;
+ if(undo){const b=document.createElement("button");b.textContent="Отменить";b.onclick=()=>{undo();t.remove()};t.appendChild(b)}
+ $("#toasts").appendChild(t);setTimeout(()=>{t.style.transition=".4s";t.style.opacity="0";setTimeout(()=>t.remove(),400)},undo?7000:3400);}
+function drawer(h){$("#drawer").innerHTML=h;$("#drawer").classList.add("on");$("#scrim").classList.add("on")}
+function closeDrawer(){$("#drawer").classList.remove("on");$("#scrim").classList.remove("on")}
+$("#scrim").onclick=closeDrawer;document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+function spark(v,c){if(!v.length)v=[0];const w=86,h=26,mx=Math.max(1,...v);
+ return `<svg width="${w}" height="${h}"><polyline points="${v.map((x,i)=>`${i/Math.max(1,v.length-1)*w},${h-x/mx*(h-4)-2}`).join(" ")}" fill="none" stroke="${c}" stroke-width="2" style="filter:drop-shadow(0 0 4px ${c})"/></svg>`}
+function line(cv,series,h){const dpr=Math.min(2,devicePixelRatio||1),w=cv.clientWidth||520;if(!w)return;
+ cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+"px";const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+ const pl=40,pt=14,pb=16,iw=w-pl-10,ih=h-pt-pb,mx=Math.max(1,...series.flatMap(s=>s.d));
+ x.strokeStyle="#1c2a49";x.fillStyle="#5f7093";x.font="10px Consolas";
+ for(let g=0;g<=4;g++){const y=pt+ih-ih*g/4;x.beginPath();x.moveTo(pl,y);x.lineTo(w-10,y);x.stroke();x.fillText(Math.round(mx*g/4),3,y+3)}
+ series.forEach((s,i)=>{const c=PAL[i%PAL.length],n=s.d.length;if(n<2)return;x.beginPath();
+  s.d.forEach((v,j)=>{const px=pl+iw*j/(n-1),py=pt+ih-ih*Math.max(0,Math.min(1,v/mx));j?x.lineTo(px,py):x.moveTo(px,py)});
+  x.strokeStyle=c;x.lineWidth=2;x.shadowColor=c;x.shadowBlur=8;x.stroke();x.shadowBlur=0;
+  x.lineTo(pl+iw,pt+ih);x.lineTo(pl,pt+ih);x.closePath();x.fillStyle=c+"20";x.fill();
+  x.fillStyle=c;x.font="bold 11px Consolas";x.fillText(s.l+": "+Math.round(s.d[n-1]),pl+5,pt+11+i*13)})}
+async function refresh(silent){try{S=await api("/api/state");render();}catch(e){if(!silent)toast(e.message,"bad")}}
+function render(){
+ if(!S||!S.me){$("#top").style.display="none";$("#app").innerHTML=authView();return}
+ $("#top").style.display="flex";$("#mute").textContent=UI.mute?"🔇":"🔊";
+ const isAdmin=S.me.role==="admin";
+ const tabs=isAdmin?[["rating","🏆 Рейтинг"],["attacks","🎯 Атаки"],["agents","🖥 Агенты"],["journal","📜 Журнал"]]:[["self","👤 Мой агент"]];
+ if(!tabs.some(t=>t[0]===UI.view))UI.view=tabs[0][0];
+ $("#tabs").innerHTML=tabs.map(t=>`<button class="tab ${UI.view===t[0]?"on":""}" data-act="tab" data-v="${t[0]}">${t[1]}</button>`).join("");
+ const c=S.campaign;
+ $("#status").innerHTML=c.status==="active"?`<div class="pill live"><i></i>КАМПАНИЯ · ${c.delivered}</div>`:`<div class="pill">○ остановлена</div>`;
+ const V=isAdmin?{rating:ratingView,attacks:attacksView,agents:agentsView,journal:journalView}:{self:selfView};
+ $("#app").innerHTML=`<div class="view">${V[UI.view]()}</div>`;
+ after();
+}
+function authView(){
+ const m=UI.authMode;
+ return `<div id="auth"><div class="card glow ac"><h1>CYBER<b>RANGE</b></h1>
+ <p class="mut sm" style="margin-top:8px">Фоновый тренажёр реальных атак. Агент ставится на машину сотрудника и работает без окон.</p>
+ <div class="seg"><button class="${m==="login"?"on":""}" data-act="auth-mode" data-m="login">Вход</button><button class="${m==="register"?"on":""}" data-act="auth-mode" data-m="register">Регистрация</button></div>
+ <div id="authmsg"></div>
+ <div class="grid" style="gap:9px">
+ ${m==="register"?`<input class="inp" id="f-name" placeholder="Имя и фамилия"><input class="inp" id="f-dept" placeholder="Отдел (например: Бухгалтерия)">`:""}
+ <input class="inp" id="f-login" placeholder="Логин" autocomplete="username">
+ <input class="inp" id="f-pass" type="password" placeholder="Пароль" autocomplete="${m==="login"?"current-password":"new-password"}">
+ <button class="btn pri" data-act="auth-go" style="justify-content:center">${m==="login"?"Войти":"Создать аккаунт"}</button></div>
+ <p class="dim xs" style="margin-top:13px">Первый зарегистрированный аккаунт становится оператором ИБ. Все последующие — сотрудники. Демо-людей в системе нет.</p></div></div>`;
+}
+function ratingView(){
+ let us=S.rating||[];
+ if(UI.rq)us=us.filter(u=>(u.name+u.dept+u.login).toLowerCase().includes(UI.rq.toLowerCase()));
+ us=us.slice().sort((a,b)=>UI.rs==="name"?a.name.localeCompare(b.name,"ru"):UI.rs==="bad"?b.bad-a.bad:UI.rs==="rr"?b.report_rate-a.report_rate:b.xp-a.xp);
+ const all=(S.rating||[]);const tot=all.reduce((s,u)=>s+u.total,0);
+ const rr=tot?Math.round(all.reduce((s,u)=>s+u.report_rate*u.total,0)/tot):0;
+ const avg=all.length?(all.reduce((s,u)=>s+u.level,0)/all.length).toFixed(1):"0.0";
+ return `<div class="row" style="margin-bottom:15px"><div class="h1">Рейтинг сотрудников<small>Только реальные зарегистрированные люди · результаты настоящих атак</small></div>
+ <div class="spacer"></div><a class="btn" href="/api/export?type=rating">⬇ CSV</a></div>
+ <div class="grid g4" style="margin-bottom:14px">
+ <div class="card glow"><div class="xs dim">СОТРУДНИКОВ</div><div style="font-size:29px;font-weight:800;color:var(--cyan)">${all.length}</div><div class="xs mut">${(S.agents||[]).filter(a=>a.online).length} агентов онлайн</div></div>
+ <div class="card"><div class="xs dim">СРЕДНИЙ ИММУНИТЕТ</div><div style="font-size:29px;font-weight:800;color:var(--blue)">${avg}</div><div class="xs mut">шкала 1–10</div></div>
+ <div class="card"><div class="xs dim">REPORT RATE</div><div style="font-size:29px;font-weight:800;color:var(--lime)">${rr}%</div><div class="xs mut">сообщили в ИБ</div></div>
+ <div class="card"><div class="xs dim">РЕАЛЬНЫХ АТАК</div><div style="font-size:29px;font-weight:800;color:var(--amber)">${tot}</div><div class="xs mut">завершено</div></div></div>
+ <div class="row" style="margin-bottom:12px"><input class="inp" id="rq" placeholder="🔍 поиск" value="${esc(UI.rq)}" style="max-width:240px">
+ <select class="inp" id="rs" style="max-width:210px"><option value="xp" ${UI.rs==="xp"?"selected":""}>По XP</option><option value="bad" ${UI.rs==="bad"?"selected":""}>По провалам</option><option value="rr" ${UI.rs==="rr"?"selected":""}>По report rate</option><option value="name" ${UI.rs==="name"?"selected":""}>По имени</option></select></div>
+ <div class="card" style="padding:6px 12px">${us.length?`<table><thead><tr><th>#</th><th>Сотрудник</th><th>Отдел</th><th>Агент</th><th>Иммунитет</th><th>XP</th><th>Серия</th><th>Точность</th><th>Тренд</th></tr></thead><tbody>
+ ${us.map((u,i)=>`<tr data-act="dossier" data-id="${u.id}"><td><div class="rank ${i<3?"r"+(i+1):""}">${i+1}</div></td>
+ <td><div class="row" style="gap:9px;flex-wrap:nowrap"><div class="av">${esc(u.name[0]||"?")}</div><div><b>${esc(u.name)}</b><div class="xs dim mono">${esc(u.login)}</div></div></div></td>
+ <td class="sm mut">${esc(u.dept)}</td><td>${u.agents.some(a=>a.online)?`<span class="badge bg">онлайн</span>`:u.agents.length?`<span class="badge b2">офлайн</span>`:`<span class="badge b4">нет агента</span>`}</td>
+ <td><div class="row" style="gap:8px;flex-wrap:nowrap"><span class="badge b${Math.min(5,Math.ceil(u.level/2))}">${u.level}/10</span><div class="bar" style="width:56px"><i style="width:${u.level*10}%"></i></div></div></td>
+ <td class="mono"><b>${u.xp}</b></td><td class="fire">${u.streak}🔥</td><td class="mono" style="color:${u.accuracy>=70?"var(--lime)":u.accuracy>=40?"var(--amber)":"var(--rose)"}">${u.accuracy}%</td>
+ <td>${spark(u.history,PAL[i%PAL.length])}</td></tr>`).join("")}</tbody></table>`
+ :`<div class="empty">Пока нет сотрудников.<br>Зарегистрируйте реальных людей — они появятся здесь автоматически.</div>`}</div>`;
+}
+function attacksView(){
+ const c=S.campaign,cfg=c.cfg;
+ let list=(S.catalog||[]).filter(a=>(!UI.aq||(a.name+a.desc).toLowerCase().includes(UI.aq.toLowerCase()))&&(!UI.al||a.lvl===+UI.al));
+ list.sort((a,b)=>UI.as==="name"?a.name.localeCompare(b.name,"ru"):UI.as==="desc"?b.lvl-a.lvl:a.lvl-b.lvl);
+ const running=(S.tasks||[]).filter(t=>t.status==="running"||t.status==="pending");
+ const mon=UI.monitor&&(S.tasks||[]).find(t=>t.id===UI.monitor)||running[0]||(S.tasks||[])[0];
+ return `<div class="row" style="margin-bottom:15px"><div class="h1">Атаки<small>Реальное исполнение на машине сотрудника · песочница и loopback</small></div></div>
+ <div class="layout"><div>
+ ${mon?monitorCard(mon):`<div class="card empty">Нет активных задач. Запустите кампанию или атаку вручную из раздела «Агенты».</div>`}
+ <div class="card" style="margin:13px 0"><div class="row"><b class="sm">Очередь кампании · ${c.queue.length}</b><span class="xs dim">перетащите для порядка</span>
+ <div class="spacer"></div>${UI.sel.size?`<button class="btn pri sm" data-act="add-sel">＋ ${UI.sel.size}</button>`:""}<button class="btn sm" data-act="clear-q">Очистить</button></div>
+ <div id="queue" style="margin-top:11px">${c.queue.map((id,i)=>{const a=(S.catalog||[]).find(x=>x.id===id);if(!a)return "";
+  return `<div class="qitem" draggable="true" data-qi="${i}"><span class="dim">⠿</span><span class="badge b${a.lvl}">L${a.lvl}</span><span class="qn">${esc(a.name)}</span><span class="tag">${VEC[a.vector]||a.vector}</span><button class="del" data-act="q-del" data-i="${i}">✕</button></div>`}).join("")||`<div class="empty">Очередь пуста</div>`}</div></div>
+ <div class="row" style="margin-bottom:11px"><input class="inp" id="aq" placeholder="🔍 поиск атаки" value="${esc(UI.aq)}" style="max-width:210px">
+ <select class="inp" id="al" style="max-width:170px"><option value="">Все уровни</option>${[1,2,3,4,5].map(l=>`<option value="${l}" ${UI.al==l?"selected":""}>L${l} ${LVN[l]}</option>`).join("")}</select>
+ <select class="inp" id="as" style="max-width:170px"><option value="lvl" ${UI.as==="lvl"?"selected":""}>Сложность ↑</option><option value="desc" ${UI.as==="desc"?"selected":""}>Сложность ↓</option><option value="name" ${UI.as==="name"?"selected":""}>Имя</option></select></div>
+ <div class="row" style="margin-bottom:12px"><span class="xs dim">Наборы:</span>${(S.presets||[]).map(p=>`<button class="chip" data-act="preset" data-id="${p.id}">${esc(p.name)}</button>`).join("")}
+ <button class="chip" data-act="save-preset">💾 сохранить</button><button class="chip" data-act="quick-l1">L1–L2</button><button class="chip" data-act="quick-all">все ${S.catalog.length}</button></div>
+ <div class="grid g3">${list.map(a=>`<div class="card atk ${UI.sel.has(a.id)?"picked":""}" style="--lv:${LVC[a.lvl]}" data-act="atk" data-id="${a.id}">
+ <input type="checkbox" class="ck" data-act="sel" data-id="${a.id}" ${UI.sel.has(a.id)?"checked":""}>
+ <span class="badge b${a.lvl}">L${a.lvl}</span> <span class="badge bb">${a.kind==="tech"?"техническая":a.kind==="phys"?"физическая":"социнженерия"}</span>
+ <div class="nm">${esc(a.name)}</div><div class="ds">${esc(a.desc)}</div><div class="ft"><span class="tag">${VEC[a.vector]||a.vector}</span><span class="tag">🎯 ${esc(a.goal)}</span>${c.queue.includes(a.id)?`<span class="badge bg">в очереди</span>`:""}</div></div>`).join("")}</div>
+ </div>
+ <div class="panel"><h4>Пульт кампании</h4>
+ <div class="ctl"><label>Интервал<output>${cfg.interval} с</output></label><input type="range" id="c-int" min="10" max="600" step="5" value="${cfg.interval}"></div>
+ <div class="ctl"><label>Потолок сложности<output>L${cfg.ceiling}</output></label><input type="range" id="c-ceil" min="1" max="5" value="${cfg.ceiling}"></div>
+ <div class="ctl"><label>Длительность</label><select class="inp" id="c-dur">${[[0,"Бессрочно"],[5,"5 минут"],[15,"15 минут"],[60,"1 час"]].map(o=>`<option value="${o[0]}" ${cfg.duration==o[0]?"selected":""}>${o[1]}</option>`).join("")}</select></div>
+ <div class="ctl"><label>Порядок</label><select class="inp" id="c-order">${[["seq","По очереди"],["random","Случайно"],["asc","По возрастанию"]].map(o=>`<option value="${o[0]}" ${cfg.order===o[0]?"selected":""}>${o[1]}</option>`).join("")}</select></div>
+ <div class="tgl"><span>Зациклить очередь</span><div class="sw ${cfg.loop?"on":""}" data-act="c-tgl" data-k="loop"></div></div>
+ <div class="ctl"><label>Цели · ${(c.targets.length||S.users.length)}</label><div class="row" style="gap:6px">${(S.users||[]).map(u=>`<button class="chip ${c.targets.includes(u.id)?"on":""}" data-act="c-target" data-id="${u.id}" style="font-size:11px;padding:5px 10px">${esc(u.name.split(" ")[0])}</button>`).join("")||`<span class="xs dim">нет сотрудников</span>`}</div></div>
+ <div class="row" style="gap:7px;margin:12px 0">${c.status==="active"?`<button class="btn warn" style="flex:1" data-act="camp" data-a="pause">⏸ Пауза</button>`:`<button class="btn ok" style="flex:1" data-act="camp" data-a="start">▶ Запустить</button>`}
+ <button class="btn bad sm" data-act="camp" data-a="stop">■</button></div>
+ <button class="btn sm" style="width:100%;margin-bottom:7px" data-act="rand-q">🎲 Случайный набор</button>
+ <a class="btn sm" style="width:100%;justify-content:center" href="/api/export?type=events">⬇ Журнал JSON</a>
+ <div style="margin-top:13px"><h4 style="margin-bottom:9px">События</h4><div class="logs" id="evfeed"></div></div>
+ </div></div>`;
+}
+function monitorCard(t){
+ const a=t.attack||{},p=t.params||{},m=(t.metrics||[]).slice(-1)[0]||{};
+ const keys=Object.keys(m).filter(k=>k!=="t"&&k!=="codes"&&k!=="ports");
+ const live=t.status==="running";
+ return `<div class="card glow"><div class="row"><span class="badge b${a.lvl||1}">L${a.lvl||1}</span>
+ <b>${esc(a.name||"—")}</b><span class="badge ${live?"bg":"bc"}">${live?"ВЫПОЛНЯЕТСЯ РЕАЛЬНО":t.status}</span>
+ <div class="spacer"></div><button class="btn sm bad" data-act="stop-task" data-id="${t.id}">■ Стоп</button></div>
+ ${t.evidence?`<div class="evi" style="margin-top:11px">✔ ${esc(t.evidence)}</div>`:""}
+ <div class="statline" style="margin-top:12px">${keys.slice(0,5).map((k,i)=>`<div class="st"><b style="color:${PAL[i%PAL.length]}">${typeof m[k]==="number"?Math.round(m[k]*10)/10:esc(m[k])}</b><span>${k}</span></div>`).join("")||`<div class="st"><b>—</b><span>ожидание телеметрии</span></div>`}</div>
+ <canvas class="ch" id="monch"></canvas>
+ <div class="layout" style="margin-top:12px;grid-template-columns:1fr 250px">
+  <div class="logs" id="monlogs">${(t.logs||[]).map(l=>`<div class="lr ${l.l||""}"><span class="dim mono">${new Date((l.t||0)*1000).toLocaleTimeString("ru")}</span><span>${esc(l.m)}</span></div>`).join("")||'<div class="lr">ожидание…</div>'}</div>
+  <div><h4 style="font-size:10.5px;letter-spacing:.15em;color:var(--cyan);margin-bottom:10px">ЖИВОЕ УПРАВЛЕНИЕ</h4>
+  ${[["rps","Интенсивность RPS",5,400],["workers","Потоки атаки",1,64],["duration","Длительность, с",10,180],["rate","Темп попыток/с",1,30],["cpu_cap","Лимит CPU %",5,60],["spread_ms","Задержка шифрования",150,3000],["rate_limit","Rate limit цели",0,200],["work_ms","Тяжесть запроса, мс",0,40],["lockout","Порог блокировки",0,30],["files","Файлов",4,24]].filter(x=>x[0] in p).map(x=>
+   `<div class="ctl"><label>${x[1]}<output>${p[x[0]]}</output></label><input type="range" data-live="${x[0]}" data-id="${t.id}" min="${x[2]}" max="${x[3]}" value="${p[x[0]]}"></div>`).join("")}
+  ${[["tfa","2FA на цели"],["captcha","Задержка CAPTCHA"],["cache","Кэш на цели"],["breach_check","Проверка по утечкам"],["parameterized","Параметризация SQL"],["csp","CSP"],["sanitize","Экранирование"],["tls","TLS"],["dist","Ротация источников"]].filter(x=>x[0] in p).map(x=>
+   `<div class="tgl"><span>${x[1]}</span><div class="sw ${p[x[0]]?"on":""}" data-act="live-tgl" data-k="${x[0]}" data-id="${t.id}"></div></div>`).join("")}
+  ${a.module==="ransom"?`<button class="btn sm warn" style="width:100%;margin-bottom:6px" data-act="cmd" data-id="${t.id}" data-c="isolate">🔌 Изолировать</button>
+   <button class="btn sm ok" style="width:100%;margin-bottom:6px" data-act="cmd" data-id="${t.id}" data-c="restore">💾 Восстановить файлы</button>`:""}
+  ${a.module==="miner"?`<button class="btn sm ok" style="width:100%;margin-bottom:6px" data-act="cmd" data-id="${t.id}" data-c="kill">⚡ Убить майнер</button>`:""}
+  </div></div></div>`;
+}
+function agentsView(){
+ const ag=S.agents||[];
+ return `<div class="row" style="margin-bottom:15px"><div class="h1">Агенты<small>Фоновая служба без окон · автостарт · супервизор перезапускает её всегда</small></div>
+ <div class="spacer"></div><button class="btn pri" data-act="new-enroll">＋ Команда установки</button></div>
+ <div class="card" style="margin-bottom:14px"><b class="sm mut">Как это работает</b>
+ <p class="sm" style="margin-top:8px;line-height:1.7">Оператор создаёт токен для зарегистрированного сотрудника и выполняет две команды на его машине. Агент注册ируется, встаёт в автостарт и дальше работает в фоне: окон нет, процесс перезапускается супервизором, атаки исполняются реально в песочнице <span class="mono">~/.cyberrange/sandbox</span> и только против <span class="mono">127.0.0.1</span>.</p></div>
+ ${ag.length?`<div class="grid g2">${ag.map(a=>`<div class="card"><div class="row"><div class="av">${esc((a.user_name||"?")[0])}</div>
+ <div><b>${esc(a.user_name)}</b><div class="xs dim mono">${esc(a.host)} · ${esc(a.os)}</div></div><div class="spacer"></div>
+ <span class="badge ${a.online?"bg":"b4"}">${a.online?"онлайн":"офлайн"}</span></div>
+ <div class="xs mut" style="margin:9px 0">Отдел: ${esc(a.dept)} · последний сигнал: ${a.last_seen?new Date(a.last_seen*1000).toLocaleString("ru"):"—"}</div>
+ <div class="row"><select class="inp" id="sel-${a.id}" style="flex:1">${(S.catalog||[]).map(x=>`<option value="${x.id}">L${x.lvl} · ${esc(x.name)}</option>`).join("")}</select>
+ <button class="btn pri sm" data-act="launch" data-id="${a.id}" ${a.online?"":"disabled"}>⚡ Атаковать</button></div>
+ <div class="row" style="margin-top:9px"><button class="btn sm bad" data-act="kill" data-id="${a.id}">Kill-switch</button>
+ <button class="btn sm" data-act="unkill" data-id="${a.id}">Снять блокировку</button></div></div>`).join("")}</div>`
+ :`<div class="card empty">Агентов пока нет. Создайте команду установки и выполните её на машине сотрудника.</div>`}
+ ${(S.enroll||[]).length?`<div class="card" style="margin-top:14px"><b class="sm mut">Токены установки</b>
+ <table style="margin-top:9px"><tr><th>Сотрудник</th><th>Токен</th><th>Статус</th><th></th></tr>
+ ${S.enroll.map(e=>`<tr style="cursor:default"><td>${esc(e.user_name)}</td><td class="mono xs">${esc(e.token)}</td>
+ <td>${e.used?`<span class="badge bg">использован</span>`:`<span class="badge b2">ожидает</span>`}</td>
+ <td><button class="btn sm" data-act="show-cmd" data-token="${esc(e.token)}">Команда</button> <button class="btn sm bad" data-act="del-enroll" data-token="${esc(e.token)}">🗑</button></td></tr>`).join("")}</table></div>`:""}`;
+}
+function journalView(){
+ return `<div class="row" style="margin-bottom:15px"><div class="h1">Журнал исполнения<small>Реальные события агентов и исходы атак</small></div>
+ <div class="spacer"></div><a class="btn" href="/api/export?type=events">⬇ JSON</a></div>
+ <div class="card"><table><tr><th>Время</th><th>Тип</th><th>Событие</th></tr>
+ ${(S.events||[]).map(e=>`<tr style="cursor:default"><td class="mono xs">${new Date(e.ts*1000).toLocaleString("ru")}</td>
+ <td><span class="badge ${e.level==="ok"?"bg":e.level==="bad"?"b4":e.level==="warn"?"b2":"bc"}">${esc(e.kind)}</span></td>
+ <td class="sm">${esc(e.message)}</td></tr>`).join("")||`<tr><td colspan="3" class="empty">Пусто</td></tr>`}</table></div>`;
+}
+function selfView(){
+ const r=S.me_rating,tok=(S.my_tokens||[])[0];
+ const cmd=tok?installCmd(tok.token):"Оператор ещё не выдал команду установки.";
+ return `<div class="h1" style="margin-bottom:15px">Ваш агент<small>Тренировка идёт в фоне — отдельных окон у программы нет</small></div>
+ <div class="grid g2"><div class="card glow"><b class="sm mut">Статус</b>
+ <div style="font-size:30px;font-weight:800;color:var(--cyan);margin:8px 0">${r?r.level:1}/10</div>
+ <div class="sm mut">иммунитет · ${r?r.xp:0} XP · серия ${r?r.streak:0}🔥</div>
+ <div class="bar" style="margin-top:12px"><i style="width:${(r?r.level:1)*10}%"></i></div>
+ <div class="xs dim" style="margin-top:9px">${r&&r.agents.some(a=>a.online)?"Агент онлайн, атаки приходят автоматически":"Агент не в сети — сообщите оператору"}</div></div>
+ <div class="card"><b class="sm mut">Установка на рабочий компьютер</b><div class="cmd" style="margin-top:10px">${esc(cmd)}</div>
+ <p class="xs dim" style="margin-top:9px">Команды выполняет оператор ИБ. После установки агент работает постоянно и не показывает окон.</p></div></div>`;
+}
+function installCmd(token){
+ const srv=location.origin;
+ return `pip install -r requirements.txt\npython agent.py --enroll ${token} --server ${srv}\npython agent.py --install`;
+}
+function after(){
+ if(UI.view==="attacks"){
+  const mon=UI.monitor&&(S.tasks||[]).find(t=>t.id===UI.monitor)||(S.tasks||[]).find(t=>t.status==="running")||(S.tasks||[])[0];
+  if(mon){UI.monitor=mon.id;const cv=$("#monch");
+   if(cv){const ms=mon.metrics||[];const keys=Object.keys(ms[0]||{}).filter(k=>typeof ms[0][k]==="number"&&k!=="t").slice(0,2);
+    line(cv,keys.map(k=>({l:k,d:ms.map(m=>m[k]||0)})),170)}
+   const lg=$("#monlogs");if(lg)lg.scrollTop=lg.scrollHeight;}
+  const f=$("#evfeed");if(f)f.innerHTML=(S.events||[]).slice(0,20).map(e=>`<div class="lr ${e.level==="bad"?"bad":e.level==="ok"?"ok":e.level==="warn"?"warn":""}"><span class="dim mono">${new Date(e.ts*1000).toLocaleTimeString("ru")}</span><span>${esc(e.message)}</span></div>`).join("");
+  const q=$("#queue");if(q)bindDrag(q);
+ }
+}
+function bindDrag(box){box.querySelectorAll("[data-qi]").forEach(el=>{
+ el.ondragstart=e=>{UI.drag=+el.dataset.qi;el.classList.add("drag");e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain","x")}catch(x){}};
+ el.ondragend=()=>{el.classList.remove("drag");box.querySelectorAll(".over").forEach(x=>x.classList.remove("over"))};
+ el.ondragover=e=>{e.preventDefault();el.classList.add("over")};
+ el.ondragleave=()=>el.classList.remove("over");
+ el.ondrop=async e=>{e.preventDefault();const to=+el.dataset.qi,from=UI.drag;if(from===null||from===to)return;
+  const q=S.campaign.queue.slice();const [m]=q.splice(from,1);q.splice(to,0,m);UI.drag=null;
+  await api("/api/campaign",{queue:q});refresh(true)};})}
+document.addEventListener("click",async e=>{
+ const t=e.target.closest("[data-act]");if(!t)return;const k=t.dataset.act;
+ try{
+ if(k==="auth-mode"){UI.authMode=t.dataset.m;render();return}
+ if(k==="auth-go"){
+  const body={login:$("#f-login").value,password:$("#f-pass").value};
+  if(UI.authMode==="register"){body.name=$("#f-name").value;body.dept=$("#f-dept").value}
+  try{const r=await api(UI.authMode==="register"?"/api/register":"/api/login",body);
+   Snd.ok();toast(UI.authMode==="register"?(r.first?"Аккаунт оператора создан":"Аккаунт создан"):"Вход выполнен","ok");await refresh();}
+  catch(err){$("#authmsg").innerHTML=`<div class="err">${esc(err.message)}</div>`;Snd.bad()}
+  return}
+ if(k==="tab"){UI.view=t.dataset.v;render();return}
+ if(k==="sel"){e.stopPropagation();t.checked?UI.sel.add(t.dataset.id):UI.sel.delete(t.dataset.id);render();return}
+ if(k==="atk"){const a=S.catalog.find(x=>x.id===t.dataset.id);
+  drawer(`<div class="ovh"><span class="badge b${a.lvl}">L${a.lvl} ${LVN[a.lvl]}</span><span class="t">${esc(a.name)}</span><button class="x" data-act="dr-x">✕</button></div>
+  <p class="sm" style="line-height:1.65">${esc(a.desc)}</p><div class="row" style="margin:12px 0"><span class="tag">${VEC[a.vector]||a.vector}</span><span class="tag">🎯 ${esc(a.goal)}</span><span class="tag mono">${esc(a.module)}</span></div>
+  ${a.flags.map(f=>`<div class="flag"><b>⚑</b><span>${esc(f)}</span></div>`).join("")}
+  <div class="row" style="margin-top:12px"><button class="btn ok" data-act="q-add" data-id="${a.id}">＋ В очередь</button></div>`);return}
+ if(k==="dr-x"){closeDrawer();return}
+ if(k==="q-add"){const q=[...new Set([...S.campaign.queue,t.dataset.id])];await api("/api/campaign",{queue:q});closeDrawer();toast("Добавлено в очередь","ok");refresh(true);return}
+ if(k==="add-sel"){const q=[...new Set([...S.campaign.queue,...UI.sel])];UI.sel.clear();await api("/api/campaign",{queue:q});toast("Очередь пополнена","ok");refresh(true);return}
+ if(k==="clear-q"){const old=S.campaign.queue.slice();await api("/api/campaign",{queue:[]});refresh(true);
+  toast("Очередь очищена","warn",async()=>{await api("/api/campaign",{queue:old});refresh(true)});return}
+ if(k==="q-del"){const q=S.campaign.queue.slice();const [rm]=q.splice(+t.dataset.i,1);await api("/api/campaign",{queue:q});refresh(true);
+  toast("Убрано из очереди","warn",async()=>{q.splice(+t.dataset.i,0,rm);await api("/api/campaign",{queue:q});refresh(true)});return}
+ if(k==="quick-l1"){await api("/api/campaign",{queue:S.catalog.filter(a=>a.lvl<=2).map(a=>a.id),cfg:{ceiling:2}});refresh(true);return}
+ if(k==="quick-all"){await api("/api/campaign",{queue:S.catalog.map(a=>a.id),cfg:{ceiling:5}});refresh(true);return}
+ if(k==="rand-q"){const q=S.catalog.slice().sort(()=>Math.random()-.5).slice(0,8).map(a=>a.id);await api("/api/campaign",{queue:q});refresh(true);return}
+ if(k==="save-preset"){const n=prompt("Название набора:","Мой набор");if(!n)return;
+  await api("/api/presets",{name:n,queue:S.campaign.queue,cfg:{interval:S.campaign.cfg.interval,ceiling:S.campaign.cfg.ceiling}});toast("Набор сохранён","ok");refresh(true);return}
+ if(k==="preset"){const p=S.presets.find(x=>x.id===t.dataset.id);await api("/api/campaign",{queue:p.queue,cfg:p.cfg});toast("Набор загружен","ok");refresh(true);return}
+ if(k==="c-tgl"){await api("/api/campaign",{cfg:{[t.dataset.k]:!S.campaign.cfg[t.dataset.k]}});refresh(true);return}
+ if(k==="c-target"){const tg=S.campaign.targets.slice();const i=tg.indexOf(t.dataset.id);i<0?tg.push(t.dataset.id):tg.splice(i,1);
+  await api("/api/campaign",{targets:tg});refresh(true);return}
+ if(k==="camp"){await api("/api/campaign/"+t.dataset.a);Snd.ok();toast(t.dataset.a==="start"?"Кампания запущена — агенты получат атаки":"Кампания "+t.dataset.a,"ok");refresh(true);return}
+ if(k==="stop-task"){await api(`/api/task/${t.dataset.id}/stop`);toast("Останов задачи отправлен","warn");refresh(true);return}
+ if(k==="cmd"){await api(`/api/task/${t.dataset.id}/command`,{command:t.dataset.c});Snd.ping();toast("Команда отправлена агенту","ok");refresh(true);return}
+ if(k==="live-tgl"){const cur=(S.tasks.find(x=>x.id===t.dataset.id)||{}).params||{};
+  await api(`/api/task/${t.dataset.id}/control`,{[t.dataset.k]:!cur[t.dataset.k]});refresh(true);return}
+ if(k==="launch"){const sel=$("#sel-"+t.dataset.id);const r=await api("/api/launch",{agent_id:t.dataset.id,attack_id:sel.value});
+  UI.monitor=r.task_id;UI.view="attacks";Snd.ping();toast("Атака запущена реально на машине сотрудника","ok");refresh(true);return}
+ if(k==="kill"){await api(`/api/agent/${t.dataset.id}/kill`);toast("Kill-switch: задачи агента остановлены","bad");refresh(true);return}
+ if(k==="unkill"){await api(`/api/agent/${t.dataset.id}/unkill`);refresh(true);return}
+ if(k==="new-enroll"){
+  if(!(S.users||[]).length){toast("Сначала зарегистрируйте сотрудника","bad");return}
+  drawer(`<div class="ovh"><span class="t">Установка агента</span><button class="x" data-act="dr-x">✕</button></div>
+  <p class="sm mut" style="margin-bottom:11px">Выберите зарегистрированного сотрудника — токен одноразовый.</p>
+  <div class="grid" style="gap:8px">${S.users.map(u=>`<button class="btn" data-act="mk-enroll" data-id="${u.id}">${esc(u.name)} · ${esc(u.dept)}</button>`).join("")}</div>`);return}
+ if(k==="mk-enroll"){const r=await api("/api/enroll",{user_id:t.dataset.id});
+  drawer(`<div class="ovh"><span class="t">Команда установки</span><button class="x" data-act="dr-x">✕</button></div>
+  <p class="sm mut">Выполните на компьютере сотрудника в папке проекта:</p><div class="cmd" style="margin-top:11px">${esc(installCmd(r.token))}</div>
+  <p class="xs dim" style="margin-top:10px">Агент встанет в автостарт и будет работать без окон. Остановить: <span class="mono">python agent.py --uninstall</span></p>`);
+  refresh(true);return}
+ if(k==="show-cmd"){drawer(`<div class="ovh"><span class="t">Команда установки</span><button class="x" data-act="dr-x">✕</button></div><div class="cmd">${esc(installCmd(t.dataset.token))}</div>`);return}
+ if(k==="del-enroll"){await api("/api/enroll/"+t.dataset.token,null,"DELETE");toast("Токен удалён","warn");refresh(true);return}
+ if(k==="dossier"){const u=S.rating.find(x=>x.id===t.dataset.id);
+  const ts=(S.tasks||[]).filter(x=>x.user_id===u.id).slice(0,12);
+  drawer(`<div class="ovh"><div class="av">${esc(u.name[0])}</div><span class="t">${esc(u.name)}</span><button class="x" data-act="dr-x">✕</button></div>
+  <div class="row" style="margin-bottom:12px"><span class="badge bc">${esc(u.dept)}</span><span class="badge b${Math.min(5,Math.ceil(u.level/2))}">иммунитет ${u.level}/10</span><span class="fire">${u.streak}🔥</span></div>
+  <div class="grid g2" style="gap:9px;margin-bottom:13px"><div class="card" style="padding:12px"><div class="xs dim">ОТРАЖЕНО</div><b style="font-size:22px;color:var(--lime)">${u.ok}</b></div>
+  <div class="card" style="padding:12px"><div class="xs dim">ПРОВАЛОВ</div><b style="font-size:22px;color:var(--rose)">${u.bad}</b></div></div>
+  <b class="sm mut">Агенты</b><div style="margin:8px 0 13px">${u.agents.map(a=>`<div class="row sm" style="margin-bottom:6px"><span class="badge ${a.online?"bg":"b4"}">${a.online?"онлайн":"офлайн"}</span><span class="mono xs">${esc(a.host)} · ${esc(a.os)}</span></div>`).join("")||`<div class="xs dim">Агент не установлен</div>`}</div>
+  <b class="sm mut">Последние атаки</b><table style="margin-top:8px"><tr><th>Атака</th><th>Итог</th><th>XP</th></tr>
+  ${ts.map(x=>`<tr style="cursor:default"><td class="sm">${esc((x.attack||{}).name||"—")}</td><td><span class="badge ${(OUT[x.outcome]||["bc","—"])[0]}">${(OUT[x.outcome]||["bc",x.outcome||"в процессе"])[1]}</span></td><td class="mono">${x.score||0}</td></tr>`).join("")||`<tr><td colspan="3" class="empty">Нет истории</td></tr>`}</table>
+  <div class="row" style="margin-top:13px"><button class="btn bad sm" data-act="del-user" data-id="${u.id}">Удалить сотрудника</button></div>`);return}
+ if(k==="del-user"){const id=t.dataset.id;await api("/api/user/"+id,null,"DELETE");closeDrawer();refresh(true);
+  toast("Сотрудник удалён","warn",async()=>{await api(`/api/user/${id}/restore`);refresh(true)});return}
+ }catch(err){toast(err.message,"bad");Snd.bad()}
+});
+document.addEventListener("input",async e=>{
+ const el=e.target;
+ if(el.id==="rq"){UI.rq=el.value;render();const n=$("#rq");n.focus();n.setSelectionRange(el.value.length,el.value.length);return}
+ if(el.id==="aq"){UI.aq=el.value;render();const n=$("#aq");n.focus();n.setSelectionRange(el.value.length,el.value.length);return}
+ if(el.id==="c-int"){el.previousElementSibling.querySelector("output").textContent=el.value+" с";await api("/api/campaign",{cfg:{interval:+el.value}});return}
+ if(el.id==="c-ceil"){el.previousElementSibling.querySelector("output").textContent="L"+el.value;await api("/api/campaign",{cfg:{ceiling:+el.value}});return}
+ if(el.dataset.live){el.previousElementSibling.querySelector("output").textContent=el.value;
+  await api(`/api/task/${el.dataset.id}/control`,{[el.dataset.live]:+el.value});return}
+});
+document.addEventListener("change",async e=>{
+ const el=e.target;
+ if(el.id==="al"){UI.al=el.value;render()} if(el.id==="as"){UI.as=el.value;render()} if(el.id==="rs"){UI.rs=el.value;render()}
+ if(el.id==="c-dur"){await api("/api/campaign",{cfg:{duration:+el.value}})}
+ if(el.id==="c-order"){await api("/api/campaign",{cfg:{order:el.value}})}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&["f-login","f-pass","f-name","f-dept"].includes(e.target.id)){e.preventDefault();$('[data-act="auth-go"]').click()}});
+$("#mute").onclick=()=>{UI.mute=!UI.mute;$("#mute").textContent=UI.mute?"🔇":"🔊";toast(UI.mute?"Звук выключен":"Звук включён","warn")};
+$("#out").onclick=async()=>{await api("/api/logout",{});S=null;closeDrawer();render()};
+addEventListener("resize",()=>{if(S&&S.me)after()});
+let lastOutcome=0;
+setInterval(async()=>{
+ if(document.hidden)return;
+ const prev=S&&(S.events||[])[0]?.ts;
+ await refresh(true);
+ const e0=S&&(S.events||[])[0];
+ if(e0&&e0.ts!==prev&&e0.kind==="outcome"){e0.level==="ok"?Snd.ok():Snd.bad()}
+},1600);
+refresh();
+</script></body></html>
